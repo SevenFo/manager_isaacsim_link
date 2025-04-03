@@ -9,9 +9,9 @@ import shutil  # For potentially removing non-empty dirs if needed (use with cau
 # --- 配置 ---
 # !! 修改为你环境中的实际路径 !!
 ISAACSIM_SITE_PACKAGES = Path(
-    "C:/Users/hp/miniforge3/envs/env_isaacsim/Lib/site-packages/isaacsim_test"
+    "C:/Users/hp/miniforge3/envs/env_isaacsim/Lib/site-packages/isaacsim"
 )
-EXTS_DIR = ISAACSIM_SITE_PACKAGES.parent / "isaacsim_test" / "exts"  # 推断 exts 路径
+EXTS_DIR = ISAACSIM_SITE_PACKAGES.parent / "isaacsim" / "exts"  # 推断 exts 路径
 LINK_RECORD_FILE = ISAACSIM_SITE_PACKAGES / "ide_symlink_record.json"
 # -------------
 
