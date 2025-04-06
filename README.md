@@ -58,15 +58,15 @@ pip install . # or pip install -e .
 创建链接:
 ```bash
 # 使用命令行工具
-isaacsim-links create
+isaacsim-links --create
 
 # 或者直接在Python中使用
-python -m isaacsim_links.cli create
+python -m isaacsim_links.cli --create
 ```
 
 移除链接:
 ```bash
-isaacsim-links remove
+isaacsim-links --remove
 ```
 
 ## Usage
@@ -74,15 +74,15 @@ isaacsim-links remove
 Create links:
 ```bash
 # Using the command line tool
-isaacsim-links create
+isaacsim-links --create
 
 # Or directly in Python
-python -m isaacsim_links.cli create
+python -m isaacsim_links.cli --create
 ```
 
 Remove links:
 ```bash
-isaacsim-links remove
+isaacsim-links --remove
 ```
 
 ## 工作原理
