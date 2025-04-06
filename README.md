@@ -2,6 +2,7 @@
 
 ## 简介
 这是一个为 Isaac Sim Python 包创建符号链接的工具，旨在改善IDE（如VSCode）中的代码自动补全功能。通过创建从site-packages目录到Isaac Sim包的符号链接，使IDE能够正确识别和索引Isaac Sim的Python模块和类。
+![代码补全效果展示](./images/code_completion.gif)
 
 ## Introduction
 This is a tool for creating symbolic links for Isaac Sim Python packages, designed to improve code auto-completion in IDEs like VSCode. By creating symbolic links from the site-packages directory to Isaac Sim packages, it enables IDEs to correctly recognize and index Python modules and classes from Isaac Sim.
