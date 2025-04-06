@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=64.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "isaacsim-links"
+version = "0.1.0"
+description = "为 Isaac Sim 和 Omni 扩展创建 IDE 符号链接，改善代码自动补全"
+readme = "README.md"
+authors = [
+    {name = "Isaac Sim 用户", email = "your-email@example.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.6"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/isaacsim-links"
+Repository = "https://github.com/yourusername/isaacsim-links.git"
+
+[project.scripts]
+isaacsim-links = "isaacsim_links.cli:main"
+
+# 定义可编辑安装选项
+[tool.setuptools]
+packages = ["isaacsim_links"]
+
+# 这个配置支持运行自定义脚本在安装和卸载时
+[tool.setuptools.cmdclass]
+install = "isaacsim_links.setup_hooks:CustomInstall"
+develop = "isaacsim_links.setup_hooks:CustomDevelop"
+
+# 在安装前执行这些脚本
+[tool.setuptools.dynamic]
+version = {attr = "isaacsim_links.__version__"}
