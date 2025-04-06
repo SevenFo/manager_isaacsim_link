@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=64.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "isaacsim-links"
+version = "0.1.0"  
+description = "为 Isaac Sim Python package 添加符号链接，改善 IDE 代码自动补全"
+readme = "README.md"  
+authors = [
+    {name = "siky", email = "siky47@outlook.com"}
+]
+license = "MIT"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.10"
+dependencies = [] 
+
+[project.urls]
+Homepage = "https://github.com/SevenFo/manager_isaacsim_link/tree/pip-package"
+Repository = "https://github.com/SevenFo/manager_isaacsim_link.git"
+
+[project.scripts]
+isaacsim-links = "isaacsim_links.cli:main"
+
+[tool.setuptools]
+packages = ["isaacsim_links"]
+

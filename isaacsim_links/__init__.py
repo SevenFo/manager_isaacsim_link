@@ -10,3 +10,6 @@ isaacsim_links - 自动创建链接以支持 Isaac Sim 和 Omni 扩展的 IDE �
 """
 
 __version__ = "0.1.0"
+
+# 导出核心 API
+from .core import create_links, remove_links, get_base_paths, get_ext_configs

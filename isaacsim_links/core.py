@@ -68,7 +68,6 @@ def get_base_paths():
 def get_ext_configs():
     """获取扩展配置"""
     paths = get_base_paths()
-    site_packages = paths["site_packages"]
     isaacsim_site_packages = paths["isaacsim_site_packages"]
     omni_site_packages = paths["omni_site_packages"]
 
@@ -77,22 +76,19 @@ def get_ext_configs():
         {
             "name": "isaacsim.exts",
             "exts_dir": isaacsim_site_packages / "exts",
-            "target_base": isaacsim_site_packages,
-            "prefix": "isaacsim.",
+            "prefix": ["isaacsim.", "omni."],
             "description": "Isaac Sim 标准扩展",
         },
         {
             "name": "isaacsim.extsPhysics",
             "exts_dir": isaacsim_site_packages / "extsPhysics",
-            "target_base": isaacsim_site_packages,
-            "prefix": "isaacsim.",
+            "prefix": ["isaacsim.", "omni."],
             "description": "Isaac Sim 物理扩展",
         },
         {
             "name": "omni.extscore",
             "exts_dir": omni_site_packages / "extscore",
-            "target_base": omni_site_packages,
-            "prefix": "omni.",
+            "prefix": ["omni."],
             "description": "Omni 核心扩展",
         },
     ]
@@ -100,18 +96,30 @@ def get_ext_configs():
     return ext_configs
 
 
+def get_target_base(prefix: str):
+    return {
+        "isaacsim": get_base_paths()["isaacsim_site_packages"],
+        "omni": get_base_paths()["omni_site_packages"],
+    }[prefix.rstrip(".")]
+
+
 # 记录文件位置
 def get_record_file_path():
     """获取记录文件路径"""
     paths = get_base_paths()
-    return paths["isaacsim_site_packages"] / "ide_symlink_record.json"
+    return paths["isaacsim_site_packages"] / "isaacsim_links_symlink_record.json"
 
 
 # -------------
 
 
-def create_symlink_safely(source: Path, link_path: Path, links_created_record: set):
+def create_symlink_safely(
+    source: Path, link_path: Path, links_created_record: set, debug=False
+):
     """安全地创建符号链接并记录"""
+    if debug:
+        print(f"调试模式: 源路径: {source}, 链接路径: {link_path}")
+        return False
     if not source.exists():
         print(f"  - 源路径不存在，跳过: {source}")
         return False
@@ -159,6 +167,41 @@ def create_symlink_safely(source: Path, link_path: Path, links_created_record: s
         return False
 
 
+def find_all_init_paths(base_dir: Path, module_namespace: str) -> list:
+    """递归查找所有包含__init__.py文件的有效路径
+
+    Args:
+        base_dir: 扩展目录，如 exts/omni.aaa.bbb/
+        module_namespace: 模块命名空间，如 'omni' 或 'isaacsim'
+
+    Returns:
+        包含元组(目录路径, 相对路径部分)的列表
+    """
+    # 检查第一级目录（模块命名空间）是否存在
+    namespace_dir = base_dir / module_namespace
+    if not namespace_dir.exists() or not namespace_dir.is_dir():
+        return []
+
+    found_paths = []
+
+    def collect_init_files(directory: Path):
+        # 检查当前目录是否有__init__.py
+        init_file = directory / "__init__.py"
+        if init_file.exists() and init_file.is_file():
+            # 计算相对于命名空间的路径
+            rel_path = directory.relative_to(namespace_dir)
+            found_paths.append((directory, rel_path))
+
+        # 递归检查所有子目录
+        for item in directory.iterdir():
+            if item.is_dir():
+                collect_init_files(item)
+
+    # 从命名空间目录开始收集
+    collect_init_files(namespace_dir)
+    return found_paths
+
+
 def create_links():
     """遍历所有配置的扩展目录并创建符号链接"""
     if platform.system() == "Windows" and not is_admin():
@@ -173,8 +216,6 @@ def create_links():
 
     for ext_config in get_ext_configs():
         exts_dir = ext_config["exts_dir"]
-        target_base = ext_config["target_base"]
-        prefix = ext_config["prefix"]
         description = ext_config["description"]
 
         if not exts_dir.is_dir():
@@ -184,40 +225,65 @@ def create_links():
         print(f"\n处理 {description}: '{exts_dir}'...")
         try:
             for item in exts_dir.iterdir():
-                if item.is_dir() and item.name.startswith(
-                    prefix
-                ):  # 扩展必须以指定前缀开头
-                    ext_name = item.name
-                    print(f"处理扩展: {ext_name}")
+                if not item.is_dir():
+                    continue
+                is_start_with_prefix = [
+                    item.name.startswith(p) for p in ext_config["prefix"]
+                ]
+                if not any(is_start_with_prefix):
+                    print(f"  - 跳过不匹配的扩展: {item.name}")
+                    continue
+                prefix = ext_config["prefix"][is_start_with_prefix.index(True)]
+                ext_name = item.name
+                print(f"处理扩展: {ext_name}")
 
-                    # 构造目标导入路径部分 (e.g., 'core.prims' from 'isaacsim.core.prims')
-                    relative_import_parts = ext_name.split(".")[1:]
-                    if not relative_import_parts:
-                        print(f"  - 无法解析相对路径，跳过: {ext_name}")
-                        continue
-                    relative_import_path = Path(*relative_import_parts)  # core/prims
+                # 构造目标导入路径部分 (e.g., 'core.prims' from 'isaacsim.core.prims')
+                relative_import_parts = ext_name.split(".")[1:]
+                if not relative_import_parts:
+                    print(f"  - 无法解析相对路径，跳过: {ext_name}")
+                    continue
+                relative_import_path = Path(*relative_import_parts)  # core/prims
 
-                    # 构造实际代码的源路径 (多种可能模式)
-                    found_code_path = None
+                # 构造实际代码的源路径 (多种可能模式)
+                found_code_path = None
+                module_namespace = prefix.rstrip(".")  # 'isaacsim' or 'omni'
 
-                    # 模式1: 完整的包路径结构, 例如: exts/isaacsim.core.prims/isaacsim/core/prims
-                    module_namespace = prefix.rstrip(".")  # 'isaacsim' or 'omni'
-                    internal_code_subpath = (
-                        Path(module_namespace) / relative_import_path
+                # 模式1: 完整的包路径结构, 例如: exts/isaacsim.core.prims/isaacsim/core/prims
+                internal_code_subpath = Path(module_namespace) / relative_import_path
+                actual_code_path = item / internal_code_subpath
+
+                if actual_code_path.exists() and (
+                    (
+                        actual_code_path.is_dir()
+                        and (actual_code_path / "__init__.py").exists()
                     )
-                    actual_code_path = item / internal_code_subpath
+                    or actual_code_path.is_file()
+                ):
+                    found_code_path = actual_code_path
+                    print(f"  - 找到模式 1: 代码在 {found_code_path}")
+                else:
+                    # 使用新的find_all_init_paths函数查找所有有效路径
+                    all_init_paths = find_all_init_paths(item, module_namespace)
 
-                    if actual_code_path.exists() and (
-                        (
-                            actual_code_path.is_dir()
-                            and (actual_code_path / "__init__.py").exists()
-                        )
-                        or actual_code_path.is_file()
-                    ):
-                        found_code_path = actual_code_path
-                        print(f"  - 找到模式 1: 代码在 {found_code_path}")
+                    if all_init_paths:
+                        print(f"  - 通过递归搜索找到 {len(all_init_paths)} 个有效子包:")
+
+                        for code_path, rel_path in all_init_paths:
+                            # 构造每个子包对应的目标链接路径
+                            # 例如，从 omni/aaa/bbb 计算出 target_base/aaa/bbb
+                            subpath_link = get_target_base(module_namespace) / rel_path
+
+                            print(f"    * 处理子包: {rel_path} -> {code_path}")
+
+                            if create_symlink_safely(
+                                code_path, subpath_link, created_links
+                            ):
+                                newly_created_count += 1
+
+                        # 已创建所有子包链接，继续下一个扩展
+                        continue
                     else:
-                        # 模式2: 代码直接在扩展目录下带有 __init__.py
+                        # 回退到模式2: 代码直接在扩展目录下带有 __init__.py
                         potential_init_file = item / "__init__.py"
                         if potential_init_file.exists():
                             found_code_path = item  # Link the whole extension dir
@@ -225,27 +291,18 @@ def create_links():
                                 f"  - 找到模式 2: 代码在 {found_code_path} (__init__.py)"
                             )
                         else:
-                            # 模式3: 单文件模块, 例如: exts/isaacsim.someext/someext.py
-                            potential_py_file = item / (
-                                relative_import_parts[-1] + ".py"
-                            )
-                            if potential_py_file.exists():
-                                found_code_path = potential_py_file  # Link the .py file
-                                print(f"  - 找到模式 3: 代码在 {found_code_path} (.py)")
-                            else:
-                                print(
-                                    f"  - 所有假设的代码路径均未找到，跳过: {ext_name}"
-                                )
-                                continue
+                            print(f"  - 所有假设的代码路径均未找到，跳过: {ext_name}")
+                            continue
 
-                    # 构造符号链接的目标路径 (到相应的命名空间目录)
-                    # 例如: site-packages/isaacsim/core/prims 或 site-packages/omni/core/kit
-                    target_link_path = target_base / relative_import_path
+                # 构造符号链接的目标路径 (到相应的命名空间目录)
+                target_link_path = (
+                    get_target_base(module_namespace) / relative_import_path
+                )
 
-                    if create_symlink_safely(
-                        found_code_path, target_link_path, created_links
-                    ):
-                        newly_created_count += 1
+                if create_symlink_safely(
+                    found_code_path, target_link_path, created_links
+                ):
+                    newly_created_count += 1
         except FileNotFoundError as e:
             print(f"警告: 无法访问目录 {exts_dir}: {e}")
         except PermissionError as e:
