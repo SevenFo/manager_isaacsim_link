@@ -5,7 +5,8 @@ Isaac Sim 链接管理命令行工具
 
 import argparse
 import sys
-from . import core
+from isaacsim_links import core
+from isaacsim_links.logger import logger
 
 
 def main():
@@ -25,7 +26,10 @@ def main():
         elif args.remove:
             core.remove_links()
     except Exception as e:
-        print(f"发生错误: {e}", file=sys.stderr)
+        import traceback
+
+        logger.error(f"发生错误: {e.__class__.__name__} {e}")
+        traceback.print_exc()
         return 1
 
     return 0

@@ -5,7 +5,7 @@
 import os
 import sys
 from pathlib import Path
-from .core import create_links, remove_links
+from isaacsim_links.core import create_links, remove_links
 
 
 def post_install():
