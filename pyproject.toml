@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "isaacsim-links"
-version = "0.1.0"  
+version = "0.1.1"  
 description = "为 Isaac Sim Python package 添加符号链接，改善 IDE 代码自动补全"
 readme = "README.md"  
 authors = [
