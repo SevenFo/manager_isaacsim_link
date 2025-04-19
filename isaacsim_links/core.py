@@ -94,7 +94,7 @@ def get_ext_configs():
         {
             "name": "isaacsim.extscache",
             "exts_dir": isaacsim_site_packages / "extscache",
-            "prefix": ["omni.", "carb.", "isaacsim."],
+            "prefix": ["isaacsim."], # "omni.", "carb.", 
             "description": "Isaac Sim 扩展缓存",
         },
     ]

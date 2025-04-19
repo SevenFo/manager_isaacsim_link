@@ -88,6 +88,45 @@ isaacsim-links --remove
 ## 工作原理
 该工具会在Python环境的site-packages目录下搜索Isaac Sim相关的包和扩展，然后创建从这些包到标准导入路径的符号链接。这使得IDE能够找到并加载这些模块，从而提供代码补全、类型提示等功能。
 
+### 搜索路径配置
+
+参考 `isaacsim_links\core.py` 文件中的 `get_ext_configs` 函数，您可以根据需要添加或修改搜索路径配置。
+``` python
+def get_ext_configs():
+    """获取扩展配置"""
+
+    # 定义扩展目录和目标位置
+    ext_configs = [
+        {
+            "name": "isaacsim.exts",
+            "exts_dir": isaacsim_site_packages / "exts",
+            # "prefix": ["isaacsim.", "omni."],
+            "prefix": ["isaacsim."],
+            "description": "Isaac Sim 标准扩展",
+        },
+        {
+            "name": "isaacsim.extsPhysics",
+            "exts_dir": isaacsim_site_packages / "extsPhysics",
+            "prefix": ["isaacsim.", "omni."],
+            "description": "Isaac Sim 物理扩展",
+        },
+        {
+            "name": "omni.extscore",
+            "exts_dir": omni_site_packages / "extscore",
+            "prefix": ["omni."],
+            "description": "Omni 核心扩展",
+        },
+        {
+            "name": "isaacsim.extscache",
+            "exts_dir": isaacsim_site_packages / "extscache",
+            "prefix": ["isaacsim."], # "omni.", "carb.", isaacsim/extscache/omni/ 目录下的模块可能会导致 [Error] [omni.kit.window.property.templates.simple_property_widget] Exception when async '<function SimplePropertyWidget._delayed_rebuild at 0x000001E937E2CF70>'
+            "description": "Isaac Sim 扩展缓存",
+        },
+    ]
+
+    return ext_configs
+```
+
 ## How It Works
 This tool searches for Isaac Sim related packages and extensions in the site-packages directory of your Python environment, then creates symbolic links from these packages to standard import paths. This allows IDEs to find and load these modules, providing code completion, type hints, and other features.
 
