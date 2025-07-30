@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Isaac Sim 链接管理命令行工具
+Isaac Sim Link Manager command line tool
 """
 
 import argparse
@@ -10,13 +10,13 @@ from isaacsim_links.logger import logger
 
 
 def main():
-    """命令行入口点"""
+    """Command line entry point"""
     parser = argparse.ArgumentParser(
-        description="为 Isaac Sim 和 Omni 扩展创建/删除 IDE 符号链接以改善自动补全"
+        description="Create/remove IDE symbolic links for Isaac Sim and Omni extensions to improve auto-completion"
     )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--create", action="store_true", help="创建符号链接")
-    group.add_argument("--remove", action="store_true", help="删除之前创建的符号链接")
+    group.add_argument("--create", action="store_true", help="Create symbolic links")
+    group.add_argument("--remove", action="store_true", help="Remove previously created symbolic links")
 
     args = parser.parse_args()
 
@@ -28,7 +28,7 @@ def main():
     except Exception as e:
         import traceback
 
-        logger.error(f"发生错误: {e.__class__.__name__} {e}")
+        logger.error(f"Error occurred: {e.__class__.__name__} {e}")
         traceback.print_exc()
         return 1
 

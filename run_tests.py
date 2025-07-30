@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-在虚拟环境中运行测试的辅助脚本
+Helper script for running tests in a virtual environment
 """
 
 import os
@@ -13,14 +13,14 @@ from pathlib import Path
 
 
 def create_venv(venv_dir, clear=False):
-    """创建虚拟环境"""
-    print(f"正在创建虚拟环境: {venv_dir}")
+    """Create virtual environment"""
+    print(f"Creating virtual environment: {venv_dir}")
     venv.create(venv_dir, with_pip=True, clear=clear)
-    print("虚拟环境创建完成")
+    print("Virtual environment creation completed")
 
 
 def get_venv_bin_dir(venv_dir):
-    """获取虚拟环境中可执行文件的目录"""
+    """Get directory for executable files in virtual environment"""
     if platform.system() == "Windows":
         return os.path.join(venv_dir, "Scripts")
     else:
@@ -28,32 +28,32 @@ def get_venv_bin_dir(venv_dir):
 
 
 def upgrade_pip(venv_bin_dir):
-    """升级 pip 到最新版本"""
+    """Upgrade pip to latest version"""
     python_cmd = os.path.join(
         venv_bin_dir, "python.exe" if platform.system() == "Windows" else "python"
     )
-    print("升级 pip 到最新版本...")
+    print("Upgrading pip to latest version...")
     try:
         subprocess.check_call([python_cmd, "-m", "pip", "install", "--upgrade", "pip"])
     except subprocess.CalledProcessError:
-        print("警告: pip 升级失败，继续使用当前版本")
+        print("Warning: pip upgrade failed, continuing with current version")
 
 
 def install_package(venv_bin_dir, pkg_dir, dev=True):
-    """在虚拟环境中安装包"""
+    """Install package in virtual environment"""
     pip_cmd = os.path.join(venv_bin_dir, "pip")
 
-    # 安装测试依赖
-    print("安装测试依赖...")
+    # Install test dependencies
+    print("Installing test dependencies...")
     subprocess.check_call(
         [pip_cmd, "install", "pytest", "pytest-cov", "pytest-mock", "pytest-timeout"]
     )
 
-    # 安装包本身
-    print(f"在{'开发' if dev else '标准'}模式下安装 isaacsim-links 包...")
+    # Install package itself
+    print(f"Installing isaacsim-links package in {'development' if dev else 'standard'} mode...")
     try:
         if dev:
-            # 使用 PEP 517 构建后端来安装，这样可以避免直接使用 setup.py
+            # Use PEP 517 build backend for installation to avoid direct use of setup.py
             subprocess.check_call(
                 [
                     pip_cmd,
@@ -68,12 +68,12 @@ def install_package(venv_bin_dir, pkg_dir, dev=True):
             subprocess.check_call([pip_cmd, "install", str(pkg_dir)])
         return True
     except Exception as e:
-        print(f"安装失败: {e}")
+        print(f"Installation failed: {e}")
         return False
 
 
 def get_site_packages_dir(venv_bin_dir):
-    """获取虚拟环境的 site-packages 目录"""
+    """Get site-packages directory of virtual environment"""
     python_cmd = os.path.join(venv_bin_dir, "python")
     result = subprocess.check_output(
         [python_cmd, "-c", "import site; print(site.getsitepackages()[0])"]
@@ -82,10 +82,10 @@ def get_site_packages_dir(venv_bin_dir):
 
 
 def run_tests(venv_bin_dir, args):
-    """在虚拟环境中运行测试"""
+    """Run tests in virtual environment"""
     pytest_cmd = os.path.join(venv_bin_dir, "pytest")
 
-    # 构建 pytest 命令
+    # Build pytest command
     cmd = [pytest_cmd]
     if args.verbose:
         cmd.append("-v")
@@ -94,53 +94,53 @@ def run_tests(venv_bin_dir, args):
     if args.test_pattern:
         cmd.append(args.test_pattern)
 
-    print(f"运行测试命令: {' '.join(cmd)}")
+    print(f"Running test command: {' '.join(cmd)}")
     return subprocess.call(cmd)
 
 
 def main():
-    """主函数"""
-    parser = argparse.ArgumentParser(description="在虚拟环境中运行 isaacsim-links 测试")
+    """Main function"""
+    parser = argparse.ArgumentParser(description="Run isaacsim-links tests in virtual environment")
     parser.add_argument(
-        "--venv-dir", default=".venv", help="虚拟环境目录 (默认: .venv)"
+        "--venv-dir", default=".venv", help="Virtual environment directory (default: .venv)"
     )
-    parser.add_argument("--recreate", action="store_true", help="重新创建虚拟环境")
+    parser.add_argument("--recreate", action="store_true", help="Recreate virtual environment")
     parser.add_argument(
-        "--no-install", action="store_true", help="不要安装包，假设已经安装"
+        "--no-install", action="store_true", help="Don't install package, assume already installed"
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true", help="输出详细的测试信息"
+        "-v", "--verbose", action="store_true", help="Output verbose test information"
     )
-    parser.add_argument("--coverage", action="store_true", help="生成测试覆盖率报告")
-    parser.add_argument("--test-pattern", default=None, help="仅运行匹配此模式的测试")
+    parser.add_argument("--coverage", action="store_true", help="Generate test coverage report")
+    parser.add_argument("--test-pattern", default=None, help="Only run tests matching this pattern")
     parser.add_argument(
-        "--no-dev", action="store_true", help="使用标准模式安装，而不是开发模式"
+        "--no-dev", action="store_true", help="Install in standard mode instead of development mode"
     )
 
     args = parser.parse_args()
 
-    # 获取脚本和包的路径
+    # Get script and package paths
     script_dir = Path(__file__).parent
     venv_dir = script_dir / args.venv_dir
 
-    # 创建虚拟环境（如果需要）
+    # Create virtual environment (if needed)
     if not venv_dir.exists() or args.recreate:
         create_venv(venv_dir, clear=args.recreate)
 
-    # 获取虚拟环境中可执行文件的目录
+    # Get directory for executable files in virtual environment
     venv_bin_dir = get_venv_bin_dir(venv_dir)
 
-    # 升级 pip
+    # Upgrade pip
     upgrade_pip(venv_bin_dir)
 
-    # 安装包（如果需要）
+    # Install package (if needed)
     if not args.no_install:
         success = install_package(venv_bin_dir, script_dir, dev=not args.no_dev)
         if not success:
-            print("安装失败，无法继续运行测试")
+            print("Installation failed, unable to continue running tests")
             return 1
 
-    # 运行测试
+    # Run tests
     return run_tests(venv_bin_dir, args)
 
 

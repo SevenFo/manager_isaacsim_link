@@ -1,5 +1,5 @@
 """
-安装钩子：自动在包安装时创建符号链接
+Installation hook: automatically create symbolic links when package is installed
 """
 
 import os
@@ -9,40 +9,40 @@ from isaacsim_links.core import create_links, remove_links
 
 
 def post_install():
-    """安装后运行 - 创建符号链接"""
-    # 安装时才创建链接，避免在开发环境中误触发
+    """Run after installation - create symbolic links"""
+    # Only create links during installation, avoid triggering in development environment
     if os.environ.get("ISAACSIM_LINKS_SKIP_INSTALL_HOOK") == "1":
-        print("ISAACSIM_LINKS_SKIP_INSTALL_HOOK=1，跳过安装钩子")
+        print("ISAACSIM_LINKS_SKIP_INSTALL_HOOK=1, skipping install hook")
         return
 
-    print("执行安装后钩子：创建符号链接...")
+    print("Executing post-install hook: creating symbolic links...")
     try:
         count = create_links()
         if count > 0:
-            print(f"已创建 {count} 个符号链接")
+            print(f"Created {count} symbolic links")
         else:
-            print("没有创建新的符号链接")
+            print("No new symbolic links created")
     except Exception as e:
-        print(f"警告：安装时创建符号链接失败：{e}", file=sys.stderr)
-        print("请手动运行：isaacsim-links --create", file=sys.stderr)
+        print(f"Warning: Failed to create symbolic links during installation: {e}", file=sys.stderr)
+        print("Please run manually: isaacsim-links --create", file=sys.stderr)
 
 
 def pre_uninstall():
-    """卸载前运行 - 清理符号链接"""
-    # 卸载时才清理链接
+    """Run before uninstall - clean up symbolic links"""
+    # Only clean up links during uninstall
     if os.environ.get("ISAACSIM_LINKS_SKIP_UNINSTALL_HOOK") == "1":
-        print("ISAACSIM_LINKS_SKIP_UNINSTALL_HOOK=1，跳过卸载钩子")
+        print("ISAACSIM_LINKS_SKIP_UNINSTALL_HOOK=1, skipping uninstall hook")
         return
 
-    print("执行卸载前钩子：清理符号链接...")
+    print("Executing pre-uninstall hook: cleaning up symbolic links...")
     try:
         count = remove_links()
-        print(f"已清理 {count} 个符号链接")
+        print(f"Cleaned up {count} symbolic links")
     except Exception as e:
-        print(f"警告：卸载时清理符号链接失败：{e}", file=sys.stderr)
+        print(f"Warning: Failed to clean up symbolic links during uninstall: {e}", file=sys.stderr)
 
 
-# 如果安装或卸载脚本直接运行此脚本
+# If installation or uninstall scripts directly run this script
 if __name__ == "__main__":
     command = sys.argv[1] if len(sys.argv) > 1 else None
     if command == "install":
@@ -50,5 +50,5 @@ if __name__ == "__main__":
     elif command == "uninstall":
         pre_uninstall()
     else:
-        print(f"未知命令：{command}, 请使用 'install' 或 'uninstall'", file=sys.stderr)
+        print(f"Unknown command: {command}, please use 'install' or 'uninstall'", file=sys.stderr)
         sys.exit(1)
