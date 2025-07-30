@@ -1,5 +1,7 @@
 # Isaac Sim Link Manager
 
+> **Note**: This is an English translation fork of the original project by [@SevenFo](https://github.com/SevenFo/manager_isaacsim_link). All credit for the original implementation goes to the original author.
+
 ## Introduction
 This is a tool for creating symbolic links for Isaac Sim Python packages, designed to improve code auto-completion in IDEs like VSCode. By creating symbolic links from the site-packages directory to Isaac Sim packages, it enables IDEs to correctly recognize and index Python modules and classes from Isaac Sim.
 
@@ -20,8 +22,8 @@ This is a tool for creating symbolic links for Isaac Sim Python packages, design
 ## Installation
 
 ```bash
-# Clone from GitHub
-git clone https://github.com/SevenFo/manager_isaacsim_link.git
+# Clone from GitHub (this English fork)
+git clone https://github.com/brainstencil/manager_isaacsim_link.git
 cd manager_isaacsim_link
 
 # Install using pip
@@ -94,6 +96,20 @@ On Windows, creating symbolic links requires administrator privileges or develop
 
 ### IDE Still Cannot Recognize Modules
 After creating links, you may need to restart your IDE or reload the Python language server for the IDE to recognize the newly added modules.
+
+## Contributing
+
+This is an English translation fork of the original Chinese project. If you'd like to contribute:
+
+- **For English documentation improvements**: Feel free to submit PRs to this repository
+- **For core functionality changes**: Please consider contributing to the [original repository](https://github.com/SevenFo/manager_isaacsim_link) by [@SevenFo](https://github.com/SevenFo)
+- **For issues**: Check both repositories to avoid duplicates
+
+## Original Repository
+
+- **Original Author**: [@SevenFo](https://github.com/SevenFo)
+- **Original Repository**: https://github.com/SevenFo/manager_isaacsim_link
+- **Language**: Chinese (中文) with partial English translation
 
 ## License
 MIT
