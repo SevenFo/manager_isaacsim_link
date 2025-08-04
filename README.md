@@ -49,6 +49,46 @@ isaacsim-links --remove
 ## How It Works
 This tool searches for Isaac Sim related packages and extensions in the site-packages directory of your Python environment, then creates symbolic links from these packages to standard import paths. This allows IDEs to find and load these modules, providing code completion, type hints, and other features.
 
+### Search Path Configuration
+
+Refer to the `get_ext_configs` function in `isaacsim_links/core.py` file, you can add or modify search path configurations as needed.
+
+```python
+def get_ext_configs():
+    """Get extension configurations"""
+
+    # Define extension directories and target locations
+    ext_configs = [
+        {
+            "name": "isaacsim.exts",
+            "exts_dir": isaacsim_site_packages / "exts",
+            # "prefix": ["isaacsim.", "omni."],
+            "prefix": ["isaacsim."],
+            "description": "Isaac Sim Standard Extensions",
+        },
+        {
+            "name": "isaacsim.extsPhysics",
+            "exts_dir": isaacsim_site_packages / "extsPhysics",
+            "prefix": ["isaacsim.", "omni."],
+            "description": "Isaac Sim Physics Extensions",
+        },
+        {
+            "name": "omni.extscore",
+            "exts_dir": omni_site_packages / "extscore",
+            "prefix": ["omni."],
+            "description": "Omni Core Extensions",
+        },
+        {
+            "name": "isaacsim.extscache",
+            "exts_dir": isaacsim_site_packages / "extscache",
+            "prefix": ["isaacsim."], # "omni.", "carb.", modules under isaacsim/extscache/omni/ directory may cause [Error] [omni.kit.window.property.templates.simple_property_widget] Exception when async '<function SimplePropertyWidget._delayed_rebuild at 0x000001E937E2CF70>'
+            "description": "Isaac Sim Extension Cache",
+        },
+    ]
+
+    return ext_configs
+```
+
 ## Common Issues
 
 ### Link Creation Fails on Windows
