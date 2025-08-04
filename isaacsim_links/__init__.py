@@ -1,17 +1,17 @@
 """
-isaacsim_links - 自动创建链接以支持 Isaac Sim 和 Omni 扩展的 IDE 自动补全功能
+isaacsim_links - Automatically create links to support IDE auto-completion for Isaac Sim and Omni extensions
 
-这个包会自动创建符号链接，将 Isaac Sim 和 Omni 扩展库的实际代码路径链接到 Python 解释器能识别的导入路径上，
-从而使得 IDE 能够正确地提供代码自动补全和类型提示功能。
+This package automatically creates symbolic links that connect actual code paths of Isaac Sim and Omni extension libraries 
+to import paths recognizable by Python interpreters, enabling IDEs to correctly provide code auto-completion and type hints.
 
-安装: pip install isaacsim-links
-使用: 安装后会自动创建链接
-      也可以手动运行: isaacsim-links --create 或 isaacsim-links --remove
+Installation: pip install isaacsim-links
+Usage: Links are automatically created after installation
+       Can also be run manually: isaacsim-links --create or isaacsim-links --remove
 """
 
 __version__ = "0.1.1"
 
-# 导出核心 API
+# Export core API
 from .core import create_links, remove_links, get_ext_configs, _update_config_file
 
 _update_config_file()

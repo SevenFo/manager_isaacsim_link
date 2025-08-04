@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Isaac Sim Links - 为 Isaac Sim 和 Omni 扩展创建 IDE 符号链接的工具
+Isaac Sim Links - Tool for creating IDE symbolic links for Isaac Sim and Omni extensions
 
-此文件仅用于向后兼容旧版安装工具，主要配置已移至 pyproject.toml
+This file is only for backward compatibility with legacy installation tools, 
+main configuration has been moved to pyproject.toml
 """
 
-# 使用现代化的方式，让 setuptools 从 pyproject.toml 读取配置
+# Use modern approach, let setuptools read configuration from pyproject.toml
 from setuptools import setup
 
 setup()

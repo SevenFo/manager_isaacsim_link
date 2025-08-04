@@ -1,5 +1,5 @@
 """
-Isaac Sim Links 功能的集成测试
+Integration tests for Isaac Sim Links functionality
 """
 
 import os
@@ -10,28 +10,28 @@ from pathlib import Path
 import pytest
 import platform
 
-# 导入被测试的函数
+# Import functions being tested
 from isaacsim_links.core import create_links, remove_links, is_admin
 
 
 @pytest.fixture
 def mock_isaacsim_env():
-    """创建一个模拟的 Isaac Sim 环境目录结构"""
-    # 创建临时目录作为根目录
+    """Create a mock Isaac Sim environment directory structure"""
+    # Create temporary directory as root directory
     temp_dir = Path(tempfile.mkdtemp())
 
-    # 创建 site-packages 目录
+    # Create site-packages directory
     site_packages = temp_dir / "site-packages"
     site_packages.mkdir()
 
-    # 创建 isaacsim 和 omni 目录
+    # Create isaacsim and omni directories
     isaacsim_dir = site_packages / "isaacsim"
     isaacsim_dir.mkdir()
 
     omni_dir = site_packages / "omni"
     omni_dir.mkdir()
 
-    # 创建扩展目录
+    # Create extension directories
     exts_dir = isaacsim_dir / "exts"
     exts_dir.mkdir()
 
@@ -43,8 +43,8 @@ def mock_isaacsim_env():
 
     package_parent_dirs = set()
 
-    # 创建一些示例扩展
-    # 1. isaacsim.exts 中的扩展
+    # Create some example extensions
+    # 1. Extensions in isaacsim.exts
     ext1_dir = exts_dir / "isaacsim.core.prims"
     ext1_dir.mkdir(parents=True)
     isaacsim_path = ext1_dir / "isaacsim"
@@ -69,7 +69,7 @@ def mock_isaacsim_env():
         f.write('"""Test module."""\n\nclass TestClass:\n    pass\n')
     package_parent_dirs.add(isaacsim_dir / "applicaitons")
 
-    # 2. isaacsim.extsPhysics 中的扩展
+    # 2. Extensions in isaacsim.extsPhysics
     ext2_dir = exts_physics_dir / "isaacsim.physics.collision"
     ext2_dir.mkdir(parents=True)
     isaacsim_path2 = ext2_dir / "isaacsim"
@@ -85,7 +85,7 @@ def mock_isaacsim_env():
         )
     package_parent_dirs.add(isaacsim_dir / "physics")
 
-    # 3. omni.extscore 中的扩展
+    # 3. Extensions in omni.extscore
     ext3_dir = omni_extscore_dir / "omni.core.kit"
     ext3_dir.mkdir(parents=True)
     omni_path = ext3_dir / "omni"
@@ -99,7 +99,7 @@ def mock_isaacsim_env():
         f.write('"""Omni core kit module."""\n\nclass KitManager:\n    pass\n')
     package_parent_dirs.add(omni_dir / "core")
 
-    # 暴露创建的路径供测试使用
+    # Expose created paths for testing
     env_info = {
         "temp_dir": temp_dir,
         "site_packages": site_packages,
@@ -113,13 +113,13 @@ def mock_isaacsim_env():
 
     yield env_info
 
-    # 测试完成后清理临时目录
+    # Clean up temporary directory after test
     shutil.rmtree(temp_dir)
 
 
 @pytest.fixture
 def patch_base_paths(monkeypatch, mock_isaacsim_env):
-    """模拟基础路径函数"""
+    """Mock base path functions"""
 
     def mock_get_base_paths():
         return {
@@ -128,22 +128,22 @@ def patch_base_paths(monkeypatch, mock_isaacsim_env):
             "omni_site_packages": mock_isaacsim_env["omni_dir"],
         }
 
-    # 应用模拟
+    # Apply mock
     import isaacsim_links.core
 
     monkeypatch.setattr(isaacsim_links.core, "get_base_paths", mock_get_base_paths)
 
 
 def assert_symlink(link_path, expected_target):
-    # 读取实际链接目标并解析为Path对象
+    # Read actual link target and parse as Path object
     actual = Path(os.readlink(link_path))
 
-    # 处理Windows长路径前缀
+    # Handle Windows long path prefix
     actual_str = str(actual)
     if actual_str.startswith("\\\\?\\"):
         actual = Path(actual_str[4:])
 
-    # 转换为绝对路径并标准化比较
+    # Convert to absolute path and normalize for comparison
     assert actual.absolute() == Path(expected_target).absolute(), (
         f"Symlink target mismatch:\n"
         f"Actual: {actual}\n"
@@ -153,16 +153,16 @@ def assert_symlink(link_path, expected_target):
     )
 
 
-# 如果在 Windows 上运行且没有管理员权限，则跳过这个测试
+# Skip this test if running on Windows without administrator privileges
 @pytest.mark.skipif(
     platform.system() == "Windows" and not is_admin(),
-    reason="在 Windows 上需要管理员权限或开发者模式才能创建符号链接",
+    reason="Administrator privileges or developer mode required on Windows to create symbolic links",
 )
 def test_create_and_remove_links_integration(
     monkeypatch, mock_isaacsim_env, patch_base_paths
 ):
-    """测试链接创建和删除的集成功能"""
-    # 应该没有链接
+    """Test integration functionality of link creation and removal"""
+    # Should have no links
     isaacsim_dir = mock_isaacsim_env["isaacsim_dir"]
     omni_dir = mock_isaacsim_env["omni_dir"]
 
@@ -170,15 +170,15 @@ def test_create_and_remove_links_integration(
     assert not (isaacsim_dir / "physics").exists()
     assert not (omni_dir / "core").exists()
 
-    # 创建链接
+    # Create links
     create_links()
 
-    # 验证链接已经创建
+    # Verify links have been created
     assert (isaacsim_dir / "core" / "prims").exists()
     assert (isaacsim_dir / "physics" / "collision").exists()
     assert (omni_dir / "core" / "kit").exists()
 
-    # 验证链接目标指向正确
+    # Verify link targets point correctly
     expected_target1 = (
         mock_isaacsim_env["exts_dir"]
         / "isaacsim.core.prims"
@@ -201,19 +201,19 @@ def test_create_and_remove_links_integration(
         / "kit"
     )
 
-    # 非 Windows 平台可以直接检查链接目标
+    # Non-Windows platforms can directly check link targets
     assert_symlink(isaacsim_dir / "core" / "prims", expected_target1)
     assert_symlink(isaacsim_dir / "physics" / "collision", expected_target2)
     assert_symlink(omni_dir / "core" / "kit", expected_target3)
 
-    # 删除链接
+    # Remove links
     remove_links()
 
-    # 验证链接已删除
+    # Verify links have been removed
     assert not (isaacsim_dir / "core").exists()
     assert not (isaacsim_dir / "physics").exists()
     assert not (omni_dir / "core").exists()
 
-    # 验证 package_parent_dirs 都被删除了
+    # Verify package_parent_dirs have all been removed
     for d in mock_isaacsim_env["package_parent_dirs"]:
         assert not (d.exists())
