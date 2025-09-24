@@ -4,6 +4,7 @@ Isaac Sim Link Manager core functionality
 
 import os
 import sys
+import subprocess
 import platform
 import json
 from pathlib import Path
@@ -161,7 +162,13 @@ def create_symlink_safely(
     except OSError as e:
         logger.error(f"Error: Failed to create link: {e}")
         if platform.system() == "Windows":
-            logger.error("Windows tip: Please ensure running as administrator or enable developer mode.")
+            try:
+                bat_file = Path(__file__).parent / "setup_symlink.bat"
+                cmd = [str(bat_file), link_path, source ]
+                logger.info(f"Windows tip: Not running as administrator - trying alternative {bat_file} script.")
+                subprocess.run(cmd)
+            except:
+                logger.error("Windows tip: Please ensure running as administrator or enable developer mode.")
         return False
     except Exception as e:
         logger.error(f"Unexpected error occurred: {e}")
@@ -240,6 +247,9 @@ def create_links(use_new_mode=True):
 
                 ext_name = item.name
                 logger.info(f"Processing extension directory: {ext_name}")
+
+                if "core" in ext_name:
+                    print(ext_name)
 
                 if use_new_mode:
                     # --- New mode logic ---
@@ -706,5 +716,5 @@ if __name__ == "__main__":
         "Script imported as module, not executing link operations. Please call create_links() or remove_links() from other scripts."
     )
     # If you really want to execute some operations when running directly, uncomment the line below:
-    # logger.info("Running script directly, executing create links operation (old mode)...")
-    # create_links()
+    logger.info("Running script directly, executing create links operation (old mode)...")
+    create_links()
