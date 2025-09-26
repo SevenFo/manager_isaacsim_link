@@ -34,3 +34,6 @@ isaacsim-links = "isaacsim_links.cli:main"
 [tool.setuptools]
 packages = ["isaacsim_links"]
 
+[tool.setuptools.package-data]
+"isaacsim_links" = ["./setup_symlink.bat"]
+
